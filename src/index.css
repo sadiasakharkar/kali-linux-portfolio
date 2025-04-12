@@ -1,0 +1,23 @@
+/* index.css */
+
+/* First, import your Google Fonts or any external stylesheets */
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code&display=swap');
+
+/* Then, apply Tailwind CSS directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Now, your custom CSS can go below */
+body {
+  font-family: 'Fira Code', monospace;
+  background-color: #121212; /* Dark background for the terminal effect */
+  color: white;
+  margin: 0;
+  padding: 0;
+}
+
+/* Additional custom styles */
+a {
+  color: #1E90FF; /* Blue links like in Kali Linux */
+}
