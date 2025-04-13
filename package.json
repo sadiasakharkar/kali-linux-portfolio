@@ -12,6 +12,8 @@
   "dependencies": {
     "@fontsource/fira-code": "^5.2.5",
     "electron": "^35.1.5",
+    "framer-motion": "^12.6.5",
+    "lucide-react": "^0.488.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-draggable": "^4.4.6"
