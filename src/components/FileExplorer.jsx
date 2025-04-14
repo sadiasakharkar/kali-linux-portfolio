@@ -1,14 +1,16 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { Folder, FileText } from "lucide-react";
+import FileViewer from "./FileViewer";
 
 const FileExplorer = ({ onClose, isActive }) => {
   const [isResizing, setIsResizing] = useState(false);
-  const [width, setWidth] = useState(500); // Initial width
-  const [height, setHeight] = useState(600); // Initial height
+  const [width, setWidth] = useState(550);
+  const [height, setHeight] = useState(500);
   const fileExplorerRef = useRef(null);
-  const resizeRef = useRef(null);
+  const [openFile, setOpenFile] = useState(null);
 
   const handleMouseDown = (e) => {
-    e.preventDefault(); // Prevent default action, for example, dragging
+    e.preventDefault();
     setIsResizing(true);
   };
 
@@ -18,17 +20,14 @@ const FileExplorer = ({ onClose, isActive }) => {
         e.clientX - fileExplorerRef.current.getBoundingClientRect().left;
       const newHeight =
         e.clientY - fileExplorerRef.current.getBoundingClientRect().top;
-      setWidth(Math.max(newWidth, 300)); // Minimum width of 300px
-      setHeight(Math.max(newHeight, 300)); // Minimum height of 300px
+      setWidth(Math.max(newWidth, 350)); // Set minimum width
+      setHeight(Math.max(newHeight, 300)); // Set minimum height
     }
   };
 
-  const handleMouseUp = () => {
-    setIsResizing(false);
-  };
+  const handleMouseUp = () => setIsResizing(false);
 
-  // Add event listeners for mouse move and up events to handle resizing
-  React.useEffect(() => {
+  useEffect(() => {
     if (isResizing) {
       window.addEventListener("mousemove", handleMouseMove);
       window.addEventListener("mouseup", handleMouseUp);
@@ -43,189 +42,65 @@ const FileExplorer = ({ onClose, isActive }) => {
     };
   }, [isResizing]);
 
+  const items = [
+    { name: "About_Sadia.txt", type: "file" },
+    { name: "Projects", type: "folder" },
+    { name: "Hackathons", type: "folder" },
+    { name: "Certifications", type: "folder" },
+    { name: "Resume.pdf", type: "file" },
+  ];
+
   return (
-    <div
-      ref={fileExplorerRef}
-      className={`absolute top-10 left-10 bg-[#121212] border-2 border-gray-800 rounded-lg shadow-lg z-50 ${
-        isActive ? "block" : "hidden"
-      }`}
-      style={{
-        width: `${width}px`,
-        height: `${height}px`,
-      }}
-    >
-      {/* Title Bar */}
-      <div className="flex justify-between items-center bg-[#1a1a1a] px-4 py-2 rounded-t-lg">
-        <h2 className="text-white font-semibold text-lg">~ About Me</h2>
-        <button onClick={onClose} className="text-white hover:text-red-500">
-          X
-        </button>
-      </div>
-
-      {/* Personal Information */}
+    <>
       <div
-        className="text-green-400 text-xs px-4 py-3 font-mono space-y-2 overflow-y-auto"
-        style={{ maxHeight: "calc(80vh - 60px)" }}
+        ref={fileExplorerRef}
+        className={`absolute top-12 left-12 rounded-md border border-green-500 shadow-lg ${
+          isActive ? "block" : "hidden"
+        }`}
+        style={{
+          width: `${width}px`,
+          height: `${height}px`,
+          backgroundColor: "#0a0a0a",
+        }}
       >
-        <div>
-          <span className="font-semibold">Name:</span> Sadia Sakharkar
-        </div>
-        <div>
-          <span className="font-semibold">Description:</span> Computer
-          Engineering Student | Software Development and AI/ML Enthusiast
-        </div>
-
-        <div>
-          <span className="font-semibold">Email:</span>
-          <a
-            href="mailto:sakharkarsadia@gmail.com"
-            className="text-blue-400 hover:text-white"
-          >
-            sakharkarsadia@gmail.com
-          </a>
+        {/* Title Bar */}
+        <div className="flex justify-between items-center bg-[#101820] px-4 py-2 rounded-t-md text-green-400 font-mono text-sm border-b border-green-700">
+          <span>~/Documents/</span>
+          <button onClick={onClose} className="hover:text-red-500">
+            ×
+          </button>
         </div>
 
-        <div>
-          <span className="font-semibold">GitHub:</span>
-          <a
-            href="https://github.com/yourusername"
-            className="text-blue-400 hover:text-white"
-          >
-            github.com/yourusername
-          </a>
-        </div>
-
-        <div>
-          <span className="font-semibold">Location:</span> India - 402103
-        </div>
-
-        <div>
-          <span className="font-semibold">Skills:</span> C, C++, Java, Python,
-          SQL, HTML, CSS, JavaScript, PHP
-        </div>
-
-        <div>
-          <span className="font-semibold">Education:</span>
-        </div>
-        <div className="pl-4">
-          <div>
-            <span className="font-semibold">Diploma:</span> Computer Engineering
-            - Dr. Babasaheb Ambedkar Technological University, Lonere
-          </div>
-          <div>CGPA: [--] | Year of Completion: [2022]</div>
-          <div>
-            Relevant Courses: Data Structures, Object-Oriented Programming,
-            Database Management Systems
-          </div>
-        </div>
-
-        <div className="pl-4 mt-2">
-          <div>
-            <span className="font-semibold">SSC:</span> INT Academy English
-            School, Vani-Purar
-          </div>
-          <div>Percentage: 89.20% | Year of Completion: [2022]</div>
-        </div>
-
-        {/* Hackathons Section */}
-        <div className="mt-4">
-          <span className="font-semibold">Hackathons:</span>
-        </div>
-        <div className="pl-4">
-          <div>
-            <span className="font-semibold">
-              CodeBits 3.0 (March 6-7, 2025):
-            </span>
-            <br />
-            Developed an AI-powered ecosystem for education with features like
-            dropout prediction, smart attendance, plagiarism detection, and
-            academic integrity validation.
-          </div>
-          <div>
-            <span className="font-semibold">CodeCratz 2025:</span>
-            <br />
-            Developed an Event Handling platform with an innovative and dynamic
-            approach for managing events.
-          </div>
-          <div>
-            <span className="font-semibold">Smart India Hackathon 2024:</span>
-            <br />
-            Focused on AI-driven dropout prevention for students, aiming to help
-            reduce drop-out rates by providing early interventions.
-          </div>
-        </div>
-
-        {/* Project */}
-        <div className="mt-4">
-          <span className="font-semibold">Projects:</span>
-        </div>
-        <div className="pl-4">
-          <div>
-            <span className="font-semibold">
-              AgriYield Pro | Crop Yield Prediction Model:
-            </span>{" "}
-            Developed a machine learning-based platform for forecasting crop
-            yields using advanced predictive analytics.
-          </div>
-          <div>
-            <a
-              href="https://github.com/yourusername"
-              className="text-blue-400 hover:text-white"
+        {/* Content */}
+        <div className="p-4 text-[#98d1ac] font-mono text-xs overflow-y-auto grid grid-cols-2 gap-4">
+          {items.map((item, index) => (
+            <div
+              key={index}
+              onClick={() => setOpenFile(item.name)}
+              className="flex flex-col items-center justify-center p-2 border border-green-800 rounded-md hover:bg-[#101820] cursor-pointer transition duration-150"
             >
-              GitHub Repository: View on GitHub
-            </a>
-          </div>
+              {item.type === "folder" ? (
+                <Folder className="text-green-300 w-8 h-8" />
+              ) : (
+                <FileText className="text-green-300 w-8 h-8" />
+              )}
+              <span className="mt-1 text-center">{item.name}</span>
+            </div>
+          ))}
         </div>
 
-        {/* Internship */}
-        <div className="mt-4">
-          <span className="font-semibold">Internship:</span> AI/ML Developer at
-          Konect U
-        </div>
-
-        {/* Certifications */}
-        <div className="mt-4">
-          <span className="font-semibold">Certifications:</span>
-        </div>
-        <div className="pl-4">
-          <div>
-            Web Development - Completed courses in HTML, CSS, JavaScript
-          </div>
-          <div>C Language - Proficient in C programming language</div>
-          <div>
-            Computer Automation - Hands-on training in automated processes
-          </div>
-        </div>
-
-        {/* Additional Information */}
-        <div className="mt-4">
-          <span className="font-semibold">Additional Information:</span>
-        </div>
-        <div className="pl-4">
-          <div>
-            Project Management - Experience in Git for project coordination
-          </div>
-          <div>
-            Problem Solving - Strong analytical skills in technical issues
-          </div>
-          <div>Team Collaboration - Effective communicator and team player</div>
-          <div>
-            Continuous Learning - Actively pursuing emerging technologies
-          </div>
-          <div>
-            Professional Development - Engaged in coding competitions and tech
-            meetups
-          </div>
-        </div>
+        {/* Resizer */}
+        <div
+          onMouseDown={handleMouseDown}
+          className="absolute bottom-0 right-0 w-3 h-3 bg-green-400 cursor-se-resize"
+        />
       </div>
 
-      {/* Resizable handle */}
-      <div
-        ref={resizeRef}
-        onMouseDown={handleMouseDown}
-        className="absolute right-0 bottom-0 w-5 h-5 bg-gray-700 cursor-se-resize"
-      ></div>
-    </div>
+      {/* File Content Popup */}
+      {openFile && (
+        <FileViewer fileName={openFile} onClose={() => setOpenFile(null)} />
+      )}
+    </>
   );
 };
 
