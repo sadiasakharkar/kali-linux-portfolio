@@ -1,17 +1,17 @@
-<<<<<<< HEAD
 # kali-linux-portfolio
-I'm trying to build a portfolio that feels like Kali Linux — draggable terminal, real commands, file creation, and a desktop-style UI. Made with React and Tailwind CSS.
-=======
-# React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Building a portfolio that emulates the power and stealth of Kali Linux — with an interactive, draggable terminal, real command execution, file creation capabilities, and a sleek desktop-style UI. All forged in the fires of React and Tailwind CSS.
 
-Currently, two official plugins are available:
+_Encrypted for performance, designed for devs._
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## React + Vite: The Base
 
-## Expanding the ESLint configuration
+This template offers a minimalist setup to execute React on Vite with blazing-fast Hot Module Replacement (HMR) and top-tier ESLint rules.
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
->>>>>>> ef656dc (Initial Kali Linux portfolio commit)
+Currently, two core plugins are integrated for optimized performance:
+
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) — uses [Babel](https://babeljs.io/) for efficient Fast Refresh.
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) — powered by [SWC](https://swc.rs/) for ultra-fast Fast Refresh.
+
+### Expanding the Firewall
+To ramp up your game, consider integrating TypeScript and activating type-aware lint rules for robust security. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for full encryption on your code and include [`typescript-eslint`](https://typescript-eslint.io) for extra protection in your dev environment.
