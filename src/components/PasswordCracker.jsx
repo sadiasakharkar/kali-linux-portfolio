@@ -1,82 +1,39 @@
 import React, { useState } from "react";
+import WindowFrame from "./WindowFrame";
 
-const PasswordCracker = ({ onClose, onClick }) => {
-  const [hash, setHash] = useState("");
+const PasswordCracker = ({ title, onClose, onMinimize, isActive, onFocus, zIndex }) => {
+  const [hash, setHash] = useState("5f4dcc3b5aa765d61d8327deb882cf99");
   const [status, setStatus] = useState("Idle");
   const [crackedPassword, setCrackedPassword] = useState("");
-  const [log, setLog] = useState([
-    "[INFO] Password Cracker started.",
-    "[INFO] Enter a password hash and click 'Crack'.",
-  ]);
+  const [log, setLog] = useState(["john simulator ready", "Demo dictionary loaded: portfolio-wordlist.txt"]);
 
   const crackPassword = () => {
-    if (!hash) {
-      setLog([...log, "[ERROR] No hash entered."]);
+    if (!hash.trim()) {
+      setLog((prev) => ["[ERROR] hash required", ...prev]);
       return;
     }
-
     setStatus("Cracking...");
-    setLog([...log, `[INFO] Cracking hash: ${hash}...`]);
-
-    // Simulate cracking process
+    setCrackedPassword("");
+    setLog((prev) => [`Loaded hash ${hash.slice(0, 12)}...`, "Running wordlist attack simulation", ...prev]);
     setTimeout(() => {
-      const fakePassword = "password123"; // Simulate a found password
-      setCrackedPassword(fakePassword);
       setStatus("Success");
-      setLog([...log, `[INFO] Password cracked: ${fakePassword}`]);
-    }, 5000); // Simulate cracking delay
+      setCrackedPassword("password123");
+      setLog((prev) => ["Session completed: 1 password recovered", ...prev]);
+    }, 1200);
   };
 
   return (
-    <div
-      onClick={onClick}
-      className="absolute top-20 left-20 w-[600px] h-[500px] bg-black text-green-400 font-mono shadow-xl border border-green-600"
-    >
-      <div className="p-2 overflow-y-auto">
-        <div className="flex justify-between items-center mb-2">
-          <h2 className="text-lg font-bold">Kali Password Cracker</h2>
-          <button onClick={onClose} className="text-red-500 hover:text-red-300">
-            ✕
-          </button>
+    <WindowFrame title={title} onClose={onClose} onMinimize={onMinimize} onFocus={onFocus} isActive={isActive} zIndex={zIndex} defaultPosition={{ x: 250, y: 135 }} defaultSize={{ width: 600, height: 440 }} className="bg-black text-green-400" contentClassName="bg-black p-4">
+      <div className="space-y-4 text-sm">
+        <input aria-label="Password hash" value={hash} onChange={(event) => setHash(event.target.value)} className="w-full border border-green-700 bg-[#050505] px-2 py-1 text-green-300 outline-none focus:border-cyan-400" placeholder="Enter MD5/SHA hash" />
+        <button type="button" onClick={crackPassword} className="rounded bg-green-800 px-4 py-1 text-white hover:bg-green-600">Run john</button>
+        <div className="rounded border border-green-800 bg-[#050505] p-3">
+          <p>Status: <span className="text-cyan-300">{status}</span></p>
+          {crackedPassword && <p>Recovered password: <span className="text-cyan-300">{crackedPassword}</span></p>}
         </div>
-
-        <div>
-          <input
-            type="text"
-            value={hash}
-            onChange={(e) => setHash(e.target.value)}
-            className="w-full px-2 py-1 text-sm border border-green-500 bg-black text-green-400 mb-3"
-            placeholder="Enter hash (MD5/SHA-256)"
-          />
-          <button
-            onClick={crackPassword}
-            className="w-full px-3 py-1 bg-green-800 text-white rounded hover:bg-green-600"
-          >
-            Crack Hash
-          </button>
-        </div>
-
-        <div className="mt-4">
-          <h3 className="underline">Status:</h3>
-          <p>{status}</p>
-          {status === "Success" && (
-            <div className="mt-2">
-              <h3 className="underline">Cracked Password:</h3>
-              <p>{crackedPassword}</p>
-            </div>
-          )}
-        </div>
-
-        <div className="mt-4">
-          <h3 className="underline">Logs:</h3>
-          <div className="bg-black border border-green-600 p-2 h-40 overflow-y-auto text-xs">
-            {log.map((line, index) => (
-              <div key={index}>{line}</div>
-            ))}
-          </div>
-        </div>
+        <div className="h-40 overflow-auto border border-green-800 bg-[#050505] p-2 text-xs">{log.map((line, index) => <div key={`${line}-${index}`}>{line}</div>)}</div>
       </div>
-    </div>
+    </WindowFrame>
   );
 };
 

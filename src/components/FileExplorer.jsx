@@ -1,106 +1,96 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Folder, FileText } from "lucide-react";
-import FileViewer from "./FileViewer";
+import React, { useEffect, useState } from "react";
+import { FileText, Folder } from "lucide-react";
+import WindowFrame from "./WindowFrame";
+import { getNodeAtPath, listDirectory, normalizePath, pathToString } from "../utils/fakeFilesystem";
 
-const FileExplorer = ({ onClose, isActive }) => {
-  const [isResizing, setIsResizing] = useState(false);
-  const [width, setWidth] = useState(550);
-  const [height, setHeight] = useState(500);
-  const fileExplorerRef = useRef(null);
-  const [openFile, setOpenFile] = useState(null);
+const DEFAULT_PATH = ["home", "sadia", "Documents"];
 
-  const handleMouseDown = (e) => {
-    e.preventDefault();
-    setIsResizing(true);
-  };
-
-  const handleMouseMove = (e) => {
-    if (isResizing) {
-      const newWidth =
-        e.clientX - fileExplorerRef.current.getBoundingClientRect().left;
-      const newHeight =
-        e.clientY - fileExplorerRef.current.getBoundingClientRect().top;
-      setWidth(Math.max(newWidth, 350)); // Set minimum width
-      setHeight(Math.max(newHeight, 300)); // Set minimum height
-    }
-  };
-
-  const handleMouseUp = () => setIsResizing(false);
+const FileExplorer = ({
+  title,
+  onClose,
+  onMinimize,
+  isActive,
+  onFocus,
+  zIndex,
+  filesystem,
+  openFile,
+  initialPath,
+}) => {
+  const [path, setPath] = useState(initialPath || DEFAULT_PATH);
 
   useEffect(() => {
-    if (isResizing) {
-      window.addEventListener("mousemove", handleMouseMove);
-      window.addEventListener("mouseup", handleMouseUp);
-    } else {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
+    if (initialPath) setPath(initialPath);
+  }, [initialPath]);
+
+  const items = listDirectory(filesystem, path) || [];
+  const openItem = (item) => {
+    if (item.type === "folder") {
+      setPath([...path, item.name]);
+      return;
     }
+    const node = getNodeAtPath(filesystem, [...path, item.name]);
+    openFile(item.name, node);
+  };
 
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [isResizing]);
+  const goUp = () => {
+    if (path.length > 2) setPath((current) => current.slice(0, -1));
+  };
 
-  const items = [
-    { name: "About_Sadia.txt", type: "file" },
-    { name: "Projects", type: "folder" },
-    { name: "Hackathons", type: "folder" },
-    { name: "Certifications", type: "folder" },
-    { name: "Resume.pdf", type: "file" },
-  ];
+  const goHome = () => setPath(DEFAULT_PATH);
+
+  const jumpToPortfolioFile = (name) => {
+    const nextPath = normalizePath(DEFAULT_PATH, name);
+    const node = getNodeAtPath(filesystem, nextPath);
+    if (!node) return;
+    if (node.type === "folder") setPath(nextPath);
+    else openFile(name, node);
+  };
 
   return (
-    <>
-      <div
-        ref={fileExplorerRef}
-        className={`absolute top-12 left-12 rounded-md border border-green-500 shadow-lg ${
-          isActive ? "block" : "hidden"
-        }`}
-        style={{
-          width: `${width}px`,
-          height: `${height}px`,
-          backgroundColor: "#0a0a0a",
-        }}
-      >
-        {/* Title Bar */}
-        <div className="flex justify-between items-center bg-[#101820] px-4 py-2 rounded-t-md text-green-400 font-mono text-sm border-b border-green-700">
-          <span>~/Documents/</span>
-          <button onClick={onClose} className="hover:text-red-500">
-            ×
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="p-4 text-[#98d1ac] font-mono text-xs overflow-y-auto grid grid-cols-2 gap-4">
-          {items.map((item, index) => (
-            <div
-              key={index}
-              onClick={() => setOpenFile(item.name)}
-              className="flex flex-col items-center justify-center p-2 border border-green-800 rounded-md hover:bg-[#101820] cursor-pointer transition duration-150"
-            >
-              {item.type === "folder" ? (
-                <Folder className="text-green-300 w-8 h-8" />
-              ) : (
-                <FileText className="text-green-300 w-8 h-8" />
-              )}
-              <span className="mt-1 text-center">{item.name}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Resizer */}
-        <div
-          onMouseDown={handleMouseDown}
-          className="absolute bottom-0 right-0 w-3 h-3 bg-green-400 cursor-se-resize"
-        />
+    <WindowFrame
+      title={title || pathToString(path)}
+      onClose={onClose}
+      onMinimize={onMinimize}
+      onFocus={onFocus}
+      isActive={isActive}
+      zIndex={zIndex}
+      defaultPosition={{ x: 72, y: 62 }}
+      defaultSize={{ width: 620, height: 480 }}
+      className="bg-[#0a0a0a] text-[#98d1ac]"
+      contentClassName="bg-[#0a0a0a]"
+    >
+      <div className="flex flex-wrap items-center gap-2 border-b border-green-800 bg-black/40 px-3 py-2 text-xs text-green-300">
+        <button type="button" onClick={goUp} disabled={path.length <= 2} className="rounded border border-green-700 px-2 py-1 disabled:opacity-40" aria-label="Go to parent folder" title="Parent folder">..</button>
+        <button type="button" onClick={goHome} className="rounded border border-green-700 px-2 py-1" aria-label="Go to Documents" title="Documents">~/Documents</button>
+        <span className="min-w-0 flex-1 truncate text-cyan-300">{pathToString(path)}</span>
       </div>
 
-      {/* File Content Popup */}
-      {openFile && (
-        <FileViewer fileName={openFile} onClose={() => setOpenFile(null)} />
-      )}
-    </>
+      <div className="grid grid-cols-2 gap-3 p-4 text-xs sm:grid-cols-3">
+        {items.map((item) => (
+          <button
+            key={item.name}
+            type="button"
+            onClick={() => openItem(item)}
+            onDoubleClick={() => openItem(item)}
+            className="flex min-h-24 flex-col items-center justify-center rounded-md border border-green-800 p-2 text-center transition hover:bg-[#101820] focus:outline focus:outline-2 focus:outline-cyan-400"
+            aria-label={`${item.type === "folder" ? "Open folder" : "Open file"} ${item.name}`}
+            title={item.name}
+          >
+            {item.type === "folder" ? <Folder className="h-8 w-8 text-green-300" /> : <FileText className="h-8 w-8 text-green-300" />}
+            <span className="mt-2 break-words">{item.name}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="border-t border-green-900 p-3 text-xs text-cyan-200">
+        <span className="mr-2 text-green-400">Quick open:</span>
+        {["About_Sadia.txt", "Projects", "Resume.pdf", "Contact.txt"].map((item) => (
+          <button key={item} type="button" onClick={() => jumpToPortfolioFile(item)} className="mr-2 underline hover:text-white">
+            {item.replace("_Sadia.txt", "").replace(".pdf", "").replace(".txt", "")}
+          </button>
+        ))}
+      </div>
+    </WindowFrame>
   );
 };
 

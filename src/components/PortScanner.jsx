@@ -1,96 +1,44 @@
 import React, { useState } from "react";
+import WindowFrame from "./WindowFrame";
 
-const PortScanner = ({ onClose, onClick }) => {
-  const [ip, setIp] = useState("");
-  const [portResults, setPortResults] = useState([]);
-  const [log, setLog] = useState([
-    "[INFO] PortScanner started.",
-    "[INFO] Enter an IP address and click 'Scan'.",
-  ]);
+const PortScanner = ({ title, onClose, onMinimize, isActive, onFocus, zIndex }) => {
+  const [target, setTarget] = useState("127.0.0.1");
+  const [results, setResults] = useState([]);
+  const [log, setLog] = useState(["nmap simulator initialized", "Only portfolio-safe mock scans are performed."]);
 
   const scanPorts = () => {
-    // Simple mock of port scanning
-    if (!ip) {
-      setLog([...log, "[ERROR] No IP address entered."]);
+    if (!target.trim()) {
+      setLog((prev) => ["[ERROR] target required", ...prev]);
       return;
     }
-    setLog([...log, `[INFO] Scanning IP: ${ip}...`]);
-    setPortResults([]);
+    setLog((prev) => [`Starting Nmap 7.95 scan against ${target}`, ...prev]);
+    setResults([]);
     setTimeout(() => {
-      const result = [
-        { port: 22, status: "OPEN" },
-        { port: 80, status: "CLOSED" },
-        { port: 443, status: "OPEN" },
-        { port: 8080, status: "CLOSED" },
+      const next = [
+        { port: 22, state: "open", service: "ssh" },
+        { port: 80, state: "filtered", service: "http" },
+        { port: 443, state: "open", service: "https" },
+        { port: 5173, state: "open", service: "vite-dev" },
       ];
-      setPortResults(result);
-      setLog([...log, `[INFO] Scan completed for IP: ${ip}.`]);
-    }, 2000); // Simulate network delay
+      setResults(next);
+      setLog((prev) => [`Nmap done: 4 scanned ports for ${target}`, ...prev]);
+    }, 900);
   };
 
   return (
-    <div
-      onClick={onClick}
-      className="absolute top-20 left-20 w-[600px] h-[500px] bg-black text-green-400 font-mono shadow-xl border border-green-600"
-    >
-      <div className="p-2 overflow-y-auto">
-        <div className="flex justify-between items-center mb-2">
-          <h2 className="text-lg font-bold">Kali Port Scanner</h2>
-          <button onClick={onClose} className="text-red-500 hover:text-red-300">
-            ✕
-          </button>
+    <WindowFrame title={title} onClose={onClose} onMinimize={onMinimize} onFocus={onFocus} isActive={isActive} zIndex={zIndex} defaultPosition={{ x: 230, y: 120 }} defaultSize={{ width: 620, height: 460 }} className="bg-black text-green-400" contentClassName="bg-black p-4">
+      <div className="space-y-4 text-sm">
+        <div className="flex gap-2">
+          <input aria-label="Scan target" value={target} onChange={(event) => setTarget(event.target.value)} className="min-w-0 flex-1 border border-green-700 bg-[#050505] px-2 py-1 text-green-300 outline-none focus:border-cyan-400" />
+          <button type="button" onClick={scanPorts} className="rounded bg-green-800 px-4 py-1 text-white hover:bg-green-600">Scan</button>
         </div>
-
-        <div>
-          <input
-            type="text"
-            value={ip}
-            onChange={(e) => setIp(e.target.value)}
-            className="w-full px-2 py-1 text-sm border border-green-500 bg-black text-green-400 mb-3"
-            placeholder="Enter target IP address"
-          />
-          <button
-            onClick={scanPorts}
-            className="w-full px-3 py-1 bg-green-800 text-white rounded hover:bg-green-600"
-          >
-            Scan Ports
-          </button>
-        </div>
-
-        <div className="mt-4">
-          <h3 className="underline">Scan Results:</h3>
-          <table className="w-full text-sm mt-2 border border-green-600">
-            <thead>
-              <tr>
-                <th className="border border-green-600 px-2">Port</th>
-                <th className="border border-green-600 px-2">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {portResults.map((result, index) => (
-                <tr key={index}>
-                  <td className="border border-green-600 px-2">
-                    {result.port}
-                  </td>
-                  <td className="border border-green-600 px-2">
-                    {result.status}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="mt-4">
-          <h3 className="underline">Logs:</h3>
-          <div className="bg-black border border-green-600 p-2 h-40 overflow-y-auto text-xs">
-            {log.map((line, index) => (
-              <div key={index}>{line}</div>
-            ))}
-          </div>
-        </div>
+        <table className="w-full border border-green-700 text-left text-xs">
+          <thead className="bg-green-950/60 text-cyan-300"><tr><th className="p-2">Port</th><th>State</th><th>Service</th></tr></thead>
+          <tbody>{results.map((result) => <tr key={result.port} className="border-t border-green-900"><td className="p-2">{result.port}/tcp</td><td>{result.state}</td><td>{result.service}</td></tr>)}</tbody>
+        </table>
+        <div className="h-40 overflow-auto border border-green-800 bg-[#050505] p-2 text-xs">{log.map((line, index) => <div key={`${line}-${index}`}>{line}</div>)}</div>
       </div>
-    </div>
+    </WindowFrame>
   );
 };
 

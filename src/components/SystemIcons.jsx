@@ -1,90 +1,24 @@
-import React, { useState, useEffect } from "react";
-import { Volume2, Wifi, BatteryFull, Lock } from "lucide-react";
+import React, { useState } from "react";
+import { BatteryFull, Lock, Volume2, Wifi } from "lucide-react";
 
 const SystemIcons = () => {
-  // State variables to handle toggles and battery level
   const [isWifiOn, setIsWifiOn] = useState(true);
   const [isVolumeOn, setIsVolumeOn] = useState(true);
   const [isLocked, setIsLocked] = useState(false);
-  const [batteryLevel, setBatteryLevel] = useState(100); // Example for battery level
+  const batteryLevel = 97;
 
-  // Handle Wi-Fi toggle
-  const toggleWifi = () => {
-    setIsWifiOn(!isWifiOn);
-  };
-
-  // Handle Volume toggle
-  const toggleVolume = () => {
-    setIsVolumeOn(!isVolumeOn);
-  };
-
-  // Handle Lock toggle
-  const toggleLock = () => {
-    setIsLocked(!isLocked);
-  };
-
-  // Handle battery level simulation (decreases over time)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setBatteryLevel((prevLevel) => {
-        if (prevLevel <= 0) {
-          clearInterval(interval); // Stop when battery level reaches 0
-          return 0;
-        }
-        return prevLevel - 1; // Decrease battery level by 1 every second
-      });
-    }, 1000); // Update every second
-    return () => clearInterval(interval); // Cleanup on unmount
-  }, []);
-
-  // Handle battery icon color (green if > 20%, red if < 20%)
-  const batteryIconColor =
-    batteryLevel < 20 ? "text-red-500" : "text-green-500";
+  const iconButton = (label, title, onClick, children) => (
+    <button type="button" aria-label={label} title={title} onClick={onClick} className="rounded p-1 hover:bg-gray-700 focus:outline focus:outline-2 focus:outline-cyan-400">
+      {children}
+    </button>
+  );
 
   return (
-    <div className="flex items-center space-x-2 text-white px-4">
-      {/* Wi-Fi Icon */}
-      <Wifi
-        className={`w-5 h-5 cursor-pointer transition-all duration-150 
-          ${
-            isWifiOn
-              ? "text-blue-400 hover:text-blue-500"
-              : "text-gray-600 hover:text-gray-400"
-          }`}
-        onClick={toggleWifi}
-        title={isWifiOn ? "Turn off Wi-Fi" : "Turn on Wi-Fi"}
-      />
-
-      {/* Volume Icon */}
-      <Volume2
-        className={`w-5 h-5 cursor-pointer transition-all duration-150 
-          ${
-            isVolumeOn
-              ? "text-blue-400 hover:text-blue-500"
-              : "text-gray-600 hover:text-gray-400"
-          }`}
-        onClick={toggleVolume}
-        title={isVolumeOn ? "Mute" : "Unmute"}
-      />
-
-      {/* Battery Icon */}
-      <BatteryFull
-        className={`w-5 h-5 cursor-pointer transition-all duration-150 
-          ${batteryIconColor} hover:text-white`}
-        title={`Battery: ${batteryLevel}%`}
-      />
-
-      {/* Lock Icon */}
-      <Lock
-        className={`w-5 h-5 cursor-pointer transition-all duration-150 
-          ${
-            isLocked
-              ? "text-red-400 hover:text-red-500"
-              : "text-green-400 hover:text-green-500"
-          }`}
-        onClick={toggleLock}
-        title={isLocked ? "Unlock" : "Lock"}
-      />
+    <div className="flex items-center gap-1 text-white px-2">
+      {iconButton(isWifiOn ? "Turn off Wi-Fi" : "Turn on Wi-Fi", isWifiOn ? "Wi-Fi connected" : "Wi-Fi off", () => setIsWifiOn((value) => !value), <Wifi className={`h-5 w-5 ${isWifiOn ? "text-blue-400" : "text-gray-600"}`} />)}
+      {iconButton(isVolumeOn ? "Mute volume" : "Unmute volume", isVolumeOn ? "Volume on" : "Muted", () => setIsVolumeOn((value) => !value), <Volume2 className={`h-5 w-5 ${isVolumeOn ? "text-blue-400" : "text-gray-600"}`} />)}
+      {iconButton("Battery status", `Battery: ${batteryLevel}%`, undefined, <BatteryFull className="h-5 w-5 text-green-500" />)}
+      {iconButton(isLocked ? "Unlock session" : "Lock session", isLocked ? "Locked" : "Unlocked", () => setIsLocked((value) => !value), <Lock className={`h-5 w-5 ${isLocked ? "text-red-400" : "text-green-400"}`} />)}
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Terminal from "./Terminal";
 import VsCode from "./VSCodeEditor";
 import SystemMonitor from "./SystemMonitor";
@@ -7,41 +7,74 @@ import Firewall from "./Firewall";
 import PortScanner from "./PortScanner";
 import PasswordCracker from "./PasswordCracker";
 import FileExplorer from "./FileExplorer";
+import Browser from "./Browser";
+import FileViewer from "./FileViewer";
+import { createInitialFilesystem, getNodeAtPath } from "../utils/fakeFilesystem";
 
 let appIdCounter = 0;
+
+const APP_META = {
+  terminal: { label: "Terminal", icon: "/terminal-icon.png", title: "root@kali:~" },
+  browser: { label: "Browser", icon: "/browser-icon.png", title: "Brave Browser" },
+  folder: { label: "Files", icon: "/folder-icon.png", title: "~/Documents" },
+  vsCode: { label: "VS Code", icon: "/vscode-icon.png", title: "VS Code - kali-linux-portfolio" },
+  monitor: { label: "System Monitor", icon: "/monitor-icon.png", title: "System Monitor" },
+  firewall: { label: "Firewall", icon: "/firewall-icon.svg", title: "Kali Firewall" },
+  portscanner: { label: "Port Scanner", icon: "/scanner-icon.svg", title: "Kali Port Scanner" },
+  cracker: { label: "Password Cracker", icon: "/password-icon.svg", title: "Kali Password Cracker" },
+};
 
 const Desktop = () => {
   const [workspaces, setWorkspaces] = useState({ 1: [], 2: [], 3: [], 4: [] });
   const [currentWorkspace, setCurrentWorkspace] = useState(1);
   const [activeAppId, setActiveAppId] = useState(null);
   const [time, setTime] = useState(new Date());
-
-  const [contextMenu, setContextMenu] = useState({
-    visible: false,
-    x: 0,
-    y: 0,
-  });
+  const [filesystem, setFilesystem] = useState(() => createInitialFilesystem());
+  const [fileViewer, setFileViewer] = useState(null);
+  const [contextMenu, setContextMenu] = useState({ visible: false, x: 0, y: 0 });
   const [wallpaper, setWallpaper] = useState("/kali-wallpaper.jpg");
   const [showWallpaperModal, setShowWallpaperModal] = useState(false);
+  const [topZIndex, setTopZIndex] = useState(60);
 
-  const openApp = (appName) => {
-    const id = ++appIdCounter;
+  const currentApps = workspaces[currentWorkspace];
+  const activeApp = currentApps.find((app) => app.id === activeAppId);
+  const dockApps = useMemo(() => ["terminal", "browser", "folder", "vsCode", "monitor", "firewall", "portscanner", "cracker"], []);
+  const wallpapers = ["/wallpapers/wallpaper1.png", "/wallpapers/wallpaper2.jpeg", "/wallpapers/wallpaper3.jpeg", "/kali-wallpaper.jpg"];
 
-    if (appName === "browser") {
-      window.open("https://search.brave.com", "_blank");
-    } else if (appName === "vsCode") {
-      window.open(
-        "https://vscode.dev/github/sadiasakharkar/kali-linux-portfolio",
-        "_blank"
-      );
-    } else {
-      const newApp = { id, name: appName };
+  const focusApp = (id) => {
+    setTopZIndex((value) => {
+      const next = value + 1;
       setWorkspaces((prev) => ({
         ...prev,
-        [currentWorkspace]: [...prev[currentWorkspace], newApp],
+        [currentWorkspace]: prev[currentWorkspace].map((app) =>
+          app.id === id ? { ...app, minimized: false, zIndex: next } : app
+        ),
       }));
-      setActiveAppId(id);
+      return next;
+    });
+    setActiveAppId(id);
+  };
+
+  const openApp = (appName, options = {}) => {
+    const existing = currentApps.find((app) => app.name === appName && app.minimized);
+    if (existing) {
+      focusApp(existing.id);
+      return existing.id;
     }
+
+    const id = ++appIdCounter;
+    const newApp = {
+      id,
+      name: appName,
+      minimized: false,
+      zIndex: topZIndex + 1,
+      initialPath: options.initialPath,
+    };
+
+    setTopZIndex((value) => value + 1);
+    setWorkspaces((prev) => ({ ...prev, [currentWorkspace]: [...prev[currentWorkspace], newApp] }));
+    setActiveAppId(id);
+    return id;
   };
 
   const closeApp = (id) => {
@@ -49,9 +82,33 @@ const Desktop = () => {
       ...prev,
       [currentWorkspace]: prev[currentWorkspace].filter((app) => app.id !== id),
     }));
-    if (activeAppId === id) {
-      setActiveAppId(null);
+    setActiveAppId((current) => (current === id ? null : current));
+  };
+
+  const minimizeApp = (id) => {
+    setWorkspaces((prev) => ({
+      ...prev,
+      [currentWorkspace]: prev[currentWorkspace].map((app) =>
+        app.id === id ? { ...app, minimized: true } : app
+      ),
+    }));
+    setActiveAppId((current) => (current === id ? null : current));
+  };
+
+  const openFile = (fileName, node) => {
+    setFileViewer({ fileName, node });
+    setTopZIndex((value) => value + 1);
+  };
+
+  const openDesktopItem = (fileName) => {
+    const path = ["home", "sadia", "Documents", fileName];
+    const node = getNodeAtPath(filesystem, path);
+    if (!node) return;
+    if (node.type === "folder") {
+      openApp("folder", { initialPath: path });
+      return;
     }
+    openFile(fileName, node);
   };
 
   useEffect(() => {
@@ -59,252 +116,141 @@ const Desktop = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleContextMenu = (e) => {
-    e.preventDefault();
-    setContextMenu({ visible: true, x: e.clientX, y: e.clientY });
-  };
-
-  const handleClick = () => {
-    if (contextMenu.visible) setContextMenu({ ...contextMenu, visible: false });
+  const handleContextMenu = (event) => {
+    event.preventDefault();
+    setContextMenu({ visible: true, x: event.clientX, y: event.clientY });
   };
 
   const handleContextOption = (action) => {
     if (action === "terminal") openApp("terminal");
     if (action === "browser") openApp("browser");
+    if (action === "folder") openApp("folder");
     if (action === "refresh") window.location.reload();
     if (action === "wallpaper") setShowWallpaperModal(true);
     setContextMenu({ ...contextMenu, visible: false });
   };
 
-  const currentApps = workspaces[currentWorkspace];
+  const renderApp = (app) => {
+    if (app.minimized) return null;
+    const meta = APP_META[app.name];
+    const commonProps = {
+      key: app.id,
+      title: meta.title,
+      onClose: () => closeApp(app.id),
+      onMinimize: () => minimizeApp(app.id),
+      isActive: activeAppId === app.id,
+      onFocus: () => focusApp(app.id),
+      zIndex: app.zIndex,
+    };
 
-  const wallpapers = [
-    "/wallpapers/wallpaper1.png",
-    "/wallpapers/wallpaper2.jpeg",
-    "/wallpapers/wallpaper3.jpeg",
-    "/kali-wallpaper.jpg", // ✅ Kali custom wallpaper
-  ];
+    if (app.name === "terminal") {
+      return <Terminal {...commonProps} filesystem={filesystem} setFilesystem={setFilesystem} openApp={openApp} openFile={openFile} />;
+    }
+    if (app.name === "folder") {
+      return <FileExplorer {...commonProps} filesystem={filesystem} openFile={openFile} initialPath={app.initialPath} />;
+    }
+    if (app.name === "browser") return <Browser {...commonProps} />;
+    if (app.name === "vsCode") return <VsCode {...commonProps} />;
+    if (app.name === "monitor") return <SystemMonitor {...commonProps} />;
+    if (app.name === "firewall") return <Firewall {...commonProps} />;
+    if (app.name === "portscanner") return <PortScanner {...commonProps} />;
+    if (app.name === "cracker") return <PasswordCracker {...commonProps} />;
+    return null;
+  };
 
   return (
-    <div
-      className="h-screen flex flex-col"
-      onContextMenu={handleContextMenu}
-      onClick={handleClick}
-    >
-      {/* 🧢 Top Bar */}
-      <div className="h-12 bg-gray-900 text-white flex items-center justify-between px-4 relative">
-        {/* Workspaces */}
-        <div className="absolute left-2 top-1/2 transform -translate-y-1/2 flex space-x-1">
-          {[1, 2, 3, 4].map((ws) => {
-            const hasApps = workspaces[ws].length > 0;
-            const isActive = currentWorkspace === ws;
+    <div className="desktop-shell h-screen overflow-hidden flex flex-col bg-black" onContextMenu={handleContextMenu} onClick={() => contextMenu.visible && setContextMenu({ ...contextMenu, visible: false })}>
+      <header className="top-panel h-12 bg-gray-900 text-white flex items-center justify-between px-4 relative">
+        <div className="workspace-switcher absolute left-2 top-1/2 flex -translate-y-1/2 gap-1">
+          {[1, 2, 3, 4].map((workspace) => {
+            const hasApps = workspaces[workspace].length > 0;
+            const isActive = currentWorkspace === workspace;
             return (
-              <button
-                key={ws}
-                onClick={() => setCurrentWorkspace(ws)}
-                className={`w-8 h-8 flex items-center justify-center rounded-sm border-2 text-sm font-semibold ${
-                  isActive
-                    ? "border-blue-500 bg-gray-800"
-                    : "border-gray-600 hover:border-gray-400 bg-gray-700"
-                }`}
-              >
-                {ws}
-                {hasApps && (
-                  <span
-                    className={`absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 rounded-full ${
-                      isActive ? "bg-blue-400" : "bg-gray-400"
-                    }`}
-                  />
-                )}
+              <button key={workspace} type="button" aria-label={`Switch to workspace ${workspace}`} title={`Workspace ${workspace}`} onClick={() => { setCurrentWorkspace(workspace); setActiveAppId(null); }} className={`relative w-8 h-8 flex items-center justify-center rounded-sm border-2 text-sm font-semibold ${isActive ? "border-blue-500 bg-gray-800" : "border-gray-600 hover:border-gray-400 bg-gray-700"}`}>
+                {workspace}
+                {hasApps && <span className={`absolute bottom-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full ${isActive ? "bg-blue-400" : "bg-gray-400"}`} />}
               </button>
             );
           })}
         </div>
 
-        {/* App Indicators */}
-        <div className="flex space-x-2 absolute left-40 top-1/2 transform -translate-y-1/2">
-          {currentApps.map((app) => (
-            <button
-              key={app.id}
-              onClick={() => setActiveAppId(app.id)}
-              title={app.name}
-              className={`w-8 h-8 rounded-md border-2 flex items-center justify-center ${
-                app.id === activeAppId
-                  ? "border-blue-500 bg-gray-700"
-                  : "border-gray-700 hover:border-gray-500"
-              }`}
-            >
-              <img
-                src={`/${app.name}-icon.png`}
-                alt={app.name}
-                className="w-5 h-5"
-              />
-            </button>
-          ))}
+        <div className="task-list absolute left-40 top-1/2 flex -translate-y-1/2 gap-2">
+          {currentApps.map((app) => {
+            const meta = APP_META[app.name];
+            return (
+              <button key={app.id} type="button" onClick={() => focusApp(app.id)} aria-label={`${app.minimized ? "Restore" : "Focus"} ${meta.label}`} title={`${app.minimized ? "Restore" : "Focus"} ${meta.label}`} className={`w-8 h-8 rounded-md border-2 flex items-center justify-center ${app.id === activeAppId ? "border-blue-500 bg-gray-700" : app.minimized ? "border-yellow-500 bg-gray-900" : "border-gray-700 hover:border-gray-500"}`}>
+                <img src={meta.icon} alt="" className="w-5 h-5" />
+              </button>
+            );
+          })}
         </div>
 
-        <div className="flex items-center space-x-4 ml-auto">
+        <div className="active-title mx-auto hidden max-w-xs truncate text-sm text-cyan-200 md:block">
+          {activeApp ? APP_META[activeApp.name].title : "Sadia Kali Portfolio"}
+        </div>
+
+        <div className="ml-auto flex items-center gap-4">
           <SystemIcons />
           <span className="text-sm font-mono">{time.toLocaleTimeString()}</span>
         </div>
-      </div>
+      </header>
 
-      {/* 🧱 Main Layout */}
-      <div className="flex h-full">
-        {/* Sidebar */}
-        <div className="w-16 flex flex-col items-center justify-between py-4 space-y-4 bg-transparent backdrop-blur-sm">
-          {/* App Icons */}
-          <div className="flex flex-col items-center space-y-4">
-            <button onClick={() => openApp("terminal")}>
-              <img
-                src="/terminal-icon.png"
-                className="w-8 hover:scale-110 transition-transform duration-150"
-              />
-            </button>
-            <button onClick={() => openApp("browser")}>
-              <img
-                src="/browser-icon.png"
-                className="w-8 hover:scale-110 transition-transform duration-150"
-              />
-            </button>
-            <button onClick={() => openApp("folder")}>
-              <img
-                src="/folder-icon.png"
-                className="w-8 hover:scale-110 transition-transform duration-150"
-              />
-            </button>
-            <button onClick={() => openApp("vsCode")}>
-              <img
-                src="/vscode-icon.png"
-                className="w-8 hover:scale-110 transition-transform duration-150"
-              />
-            </button>
-            <button onClick={() => openApp("monitor")}>
-              <img
-                src="/monitor-icon.png"
-                className="w-8 hover:scale-110 transition-transform duration-150"
-              />
-            </button>
-            <button onClick={() => openApp("firewall")}>
-              <img
-                src="/firewall-icon.svg"
-                className="w-8 hover:scale-110 transition-transform duration-150"
-              />
-            </button>
-            <button onClick={() => openApp("portscanner")}>
-              <img
-                src="/scanner-icon.svg"
-                className="w-8 hover:scale-110 transition-transform duration-150"
-              />
-            </button>
-            <button onClick={() => openApp("cracker")}>
-              <img
-                src="/password-icon.svg"
-                className="w-8 hover:scale-110 transition-transform duration-150"
-              />
-            </button>
+      <main className="flex min-h-0 flex-1">
+        <aside className="dock w-16 flex flex-col items-center justify-between py-4 bg-black/20 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-4">
+            {dockApps.map((appName) => {
+              const meta = APP_META[appName];
+              const running = currentApps.some((app) => app.name === appName);
+              return (
+                <button key={appName} type="button" onClick={() => openApp(appName)} aria-label={`Open ${meta.label}`} title={meta.label} className={`relative rounded-md p-1 transition-transform duration-150 hover:scale-110 focus:outline focus:outline-2 focus:outline-cyan-400 ${running ? "bg-cyan-950/70" : ""}`}>
+                  <img src={meta.icon} alt="" className="w-8" />
+                  {running && <span className="absolute -bottom-1 left-1/2 h-1 w-5 -translate-x-1/2 rounded-full bg-cyan-400" />}
+                </button>
+              );
+            })}
           </div>
 
-          {/* Preview Thumbnail */}
-          <div className="mb-2">
-            <img
-              src="/kali-wallpaper.jpg"
-              alt="Kali Wallpaper"
-              className="w-12 h-12 rounded-md border border-cyan-500 shadow-md hover:scale-105 transition-transform"
-            />
+          <button type="button" aria-label="Change wallpaper" title="Change wallpaper" onClick={() => setShowWallpaperModal(true)} className="mb-2">
+            <img src="/kali-wallpaper.jpg" alt="" className="w-12 h-12 rounded-md border border-cyan-500 shadow-md hover:scale-105 transition-transform" />
+          </button>
+        </aside>
+
+        <section className="desktop-area relative min-w-0 flex-1 overflow-hidden p-4" style={{ backgroundImage: `url('${wallpaper}')`, backgroundSize: "cover", backgroundPosition: "center" }}>
+          <div className="quick-files grid w-fit grid-cols-2 gap-3 text-xs text-cyan-100 sm:grid-cols-3">
+            {[["About", "About_Sadia.txt"], ["Projects", "Projects"], ["Resume", "Resume.pdf"], ["Contact", "Contact.txt"]].map(([label, fileName]) => (
+              <button key={fileName} type="button" onClick={() => openDesktopItem(fileName)} className="w-24 rounded border border-cyan-700 bg-black/55 px-2 py-2 text-center backdrop-blur-sm hover:border-cyan-300" title={`Open ${label} in Files`}>
+                <img src="/folder-icon.png" alt="" className="mx-auto mb-1 h-7 w-7" />
+                {label}
+              </button>
+            ))}
           </div>
-        </div>
 
-        {/* Desktop */}
-        <div
-          className="flex-grow relative p-4"
-          style={{
-            backgroundImage: `url('${wallpaper}')`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
-          {/* Running Apps */}
-          {currentApps.map((app) => {
-            const commonProps = {
-              key: app.id,
-              onClose: () => closeApp(app.id),
-              isActive: activeAppId === app.id,
-              onClick: () => setActiveAppId(app.id),
-            };
-            if (app.name === "terminal") return <Terminal {...commonProps} />;
-            if (app.name === "folder") return <FileExplorer {...commonProps} />;
-            if (app.name === "vsCode") return <VsCode {...commonProps} />;
-            if (app.name === "monitor")
-              return <SystemMonitor {...commonProps} />;
-            if (app.name === "firewall") return <Firewall {...commonProps} />;
-            if (app.name === "portscanner")
-              return <PortScanner {...commonProps} />;
-            if (app.name === "cracker")
-              return <PasswordCracker {...commonProps} />;
-            return null;
-          })}
-        </div>
-      </div>
+          {currentApps.map(renderApp)}
 
-      {/* 🖱️ Context Menu */}
+          {fileViewer && <FileViewer fileName={fileViewer.fileName} node={fileViewer.node} onClose={() => setFileViewer(null)} zIndex={topZIndex + 2} />}
+        </section>
+      </main>
+
       {contextMenu.visible && (
-        <ul
-          className="absolute bg-black text-cyan-300 border border-cyan-600 rounded shadow-xl text-sm w-48 z-50"
-          style={{ top: contextMenu.y, left: contextMenu.x }}
-        >
-          <li
-            className="px-4 py-2 hover:bg-cyan-700 cursor-pointer"
-            onClick={() => handleContextOption("terminal")}
-          >
-            Open Terminal
-          </li>
-          <li
-            className="px-4 py-2 hover:bg-cyan-700 cursor-pointer"
-            onClick={() => handleContextOption("browser")}
-          >
-            Open Browser
-          </li>
-          <li
-            className="px-4 py-2 hover:bg-cyan-700 cursor-pointer"
-            onClick={() => handleContextOption("refresh")}
-          >
-            Refresh
-          </li>
-          <li
-            className="px-4 py-2 hover:bg-cyan-700 cursor-pointer"
-            onClick={() => handleContextOption("wallpaper")}
-          >
-            Change Wallpaper
-          </li>
+        <ul className="absolute z-[200] w-52 rounded border border-cyan-600 bg-black text-sm text-cyan-300 shadow-xl" style={{ top: contextMenu.y, left: contextMenu.x }}>
+          {[["Open Terminal", "terminal"], ["Open Files", "folder"], ["Open Browser", "browser"], ["Refresh", "refresh"], ["Change Wallpaper", "wallpaper"]].map(([label, action]) => (
+            <li key={action} className="cursor-pointer px-4 py-2 hover:bg-cyan-700" onClick={() => handleContextOption(action)}>{label}</li>
+          ))}
         </ul>
       )}
 
-      {/* 🎨 Wallpaper Modal */}
       {showWallpaperModal && (
-        <div className="absolute top-0 left-0 w-full h-full bg-black/70 flex justify-center items-center z-50">
-          <div className="bg-gray-900 p-6 rounded-lg max-w-2xl w-full text-white">
-            <h2 className="text-xl mb-4">🖼️ Choose a Wallpaper</h2>
-            <div className="grid grid-cols-3 gap-4">
+        <div className="absolute inset-0 z-[210] flex items-center justify-center bg-black/70 p-4">
+          <div className="w-full max-w-2xl rounded-md bg-gray-900 p-6 text-white">
+            <h2 className="mb-4 text-xl">Choose a Wallpaper</h2>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
               {wallpapers.map((img, index) => (
-                <img
-                  key={index}
-                  src={img}
-                  alt={`Wallpaper ${index + 1}`}
-                  onClick={() => {
-                    setWallpaper(img);
-                    setShowWallpaperModal(false);
-                  }}
-                  className="w-32 h-32 object-cover cursor-pointer hover:border-cyan-500 border-2 border-transparent"
-                />
+                <button key={img} type="button" aria-label={`Use wallpaper ${index + 1}`} onClick={() => { setWallpaper(img); setShowWallpaperModal(false); }} className={`border-2 ${wallpaper === img ? "border-cyan-300" : "border-transparent"} hover:border-cyan-500`}>
+                  <img src={img} alt="" className="h-32 w-full object-cover" />
+                </button>
               ))}
             </div>
-            <button
-              onClick={() => setShowWallpaperModal(false)}
-              className="mt-4 px-4 py-2 bg-gray-700 rounded hover:bg-gray-600"
-            >
-              Close
-            </button>
+            <button type="button" onClick={() => setShowWallpaperModal(false)} className="mt-4 rounded bg-gray-700 px-4 py-2 hover:bg-gray-600">Close</button>
           </div>
         </div>
       )}
