@@ -49,7 +49,7 @@ export const createInitialFilesystem = () => ({
                 ),
               },
               "Resume.pdf": { type: "file", app: "resume", content: profileText() },
-              "Contact.txt": { type: "file", app: "contact", content: `${profile.email}\n${profile.phone}\n${profile.location}` },
+              "Contact.txt": { type: "file", app: "contact", content: `${profile.email}\n${profile.location}` },
               "Achievements.log": { type: "file", app: "achievements", content: profile.achievements.join("\n") },
             },
           },

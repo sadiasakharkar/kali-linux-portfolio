@@ -24,6 +24,8 @@ const Terminal = ({
   isActive,
   onFocus,
   zIndex,
+  defaultPosition,
+  defaultSize,
   filesystem,
   setFilesystem,
   openApp,
@@ -114,7 +116,7 @@ const Terminal = ({
     if (command === "experience") return profile.experience.map((job) => `${job.role} - ${job.org}\n${job.period}\n- ${job.points.join("\n- ")}`).join("\n\n");
     if (command === "projects") return profile.projects.map((project) => `${project.name}\n${project.stack}\n${project.summary}`).join("\n\n");
     if (command === "skills") return profile.skills.join(" | ");
-    if (command === "contact") return `${profile.email}\n${profile.phone}\n${profile.location}`;
+    if (command === "contact") return `${profile.email}\n${profile.location}`;
     if (command === "neofetch") {
       return `${profile.name}@kali-portfolio\n----------------------\nOS: Kali Portfolio Linux x86_64\nHost: Interactive React Workstation\nShell: portfolio-terminal\nResolution: responsive desktop/mobile\nRole: Software Engineering Intern candidate\nEducation: B.Tech CSE, Cummins College of Engineering for Women\nSkills: ${profile.skills.slice(0, 10).join(", ")}\nTheme: Kali dark / Xfce-inspired`;
     }
@@ -165,8 +167,8 @@ const Terminal = ({
       onFocus={onFocus}
       isActive={isActive}
       zIndex={zIndex}
-      defaultPosition={{ x: 56, y: 48 }}
-      defaultSize={{ width: 680, height: 450 }}
+      defaultPosition={defaultPosition}
+      defaultSize={defaultSize}
       className="bg-[#0d0d0d] text-[#00ff00]"
       contentClassName="bg-[#0d0d0d] p-4 text-sm"
     >

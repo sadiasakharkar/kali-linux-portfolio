@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import WindowFrame from "./WindowFrame";
 
-const PasswordCracker = ({ title, onClose, onMinimize, isActive, onFocus, zIndex }) => {
+const PasswordCracker = ({ title, onClose, onMinimize, isActive, onFocus, zIndex, defaultPosition, defaultSize }) => {
   const [hash, setHash] = useState("5f4dcc3b5aa765d61d8327deb882cf99");
   const [status, setStatus] = useState("Idle");
   const [crackedPassword, setCrackedPassword] = useState("");
@@ -23,7 +23,7 @@ const PasswordCracker = ({ title, onClose, onMinimize, isActive, onFocus, zIndex
   };
 
   return (
-    <WindowFrame title={title} onClose={onClose} onMinimize={onMinimize} onFocus={onFocus} isActive={isActive} zIndex={zIndex} defaultPosition={{ x: 250, y: 135 }} defaultSize={{ width: 600, height: 440 }} className="bg-black text-green-400" contentClassName="bg-black p-4">
+    <WindowFrame title={title} onClose={onClose} onMinimize={onMinimize} onFocus={onFocus} isActive={isActive} zIndex={zIndex} defaultPosition={defaultPosition} defaultSize={defaultSize} className="bg-black text-green-400" contentClassName="bg-black p-4">
       <div className="space-y-4 text-sm">
         <input aria-label="Password hash" value={hash} onChange={(event) => setHash(event.target.value)} className="w-full border border-green-700 bg-[#050505] px-2 py-1 text-green-300 outline-none focus:border-cyan-400" placeholder="Enter MD5/SHA hash" />
         <button type="button" onClick={crackPassword} className="rounded bg-green-800 px-4 py-1 text-white hover:bg-green-600">Run john</button>

@@ -94,3 +94,49 @@ a {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+.kali-window {
+  background: #071014;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.62), 0 0 0 1px rgba(120, 220, 255, 0.06) inset;
+}
+
+.kali-titlebar {
+  background-image: linear-gradient(#183747, #0f202b);
+}
+
+.kali-window-button {
+  display: inline-grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 1px solid #294b5b;
+  border-radius: 2px;
+  background: linear-gradient(#172b35, #091820);
+  color: #b7d8e4;
+  line-height: 1;
+  font-size: 0.75rem;
+}
+
+.kali-window-button:hover {
+  border-color: #46bde7;
+  color: white;
+  background: linear-gradient(#1f5268, #123140);
+}
+
+.kali-window-button.close:hover {
+  border-color: #ef4444;
+  background: linear-gradient(#7f1d1d, #450a0a);
+}
+
+.desktop-icon {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+.top-panel {
+  background: linear-gradient(#17212b, #0a1118);
+  border-bottom: 1px solid rgba(34, 211, 238, 0.22);
+}
+
+.dock {
+  border-right: 1px solid rgba(34, 211, 238, 0.24);
+}

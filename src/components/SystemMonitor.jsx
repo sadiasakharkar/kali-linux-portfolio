@@ -4,7 +4,7 @@ import { profile } from "../utils/profileData";
 
 const bar = (value) => <div className="h-2 w-32 overflow-hidden rounded bg-green-950"><div className="h-full bg-green-400" style={{ width: `${value}%` }} /></div>;
 
-const SystemMonitor = ({ title, onClose, onMinimize, isActive, onFocus, zIndex }) => {
+const SystemMonitor = ({ title, onClose, onMinimize, isActive, onFocus, zIndex, defaultPosition, defaultSize }) => {
   const [cpu, setCpu] = useState(18);
   const [ram, setRam] = useState(42);
   const [network, setNetwork] = useState(12);
@@ -21,7 +21,7 @@ const SystemMonitor = ({ title, onClose, onMinimize, isActive, onFocus, zIndex }
   }, []);
 
   return (
-    <WindowFrame title={title} onClose={onClose} onMinimize={onMinimize} onFocus={onFocus} isActive={isActive} zIndex={zIndex} defaultPosition={{ x: 180, y: 90 }} defaultSize={{ width: 440, height: 430 }} className="bg-black text-green-400" contentClassName="bg-black p-4">
+    <WindowFrame title={title} onClose={onClose} onMinimize={onMinimize} onFocus={onFocus} isActive={isActive} zIndex={zIndex} defaultPosition={defaultPosition} defaultSize={defaultSize} className="bg-black text-green-400" contentClassName="bg-black p-4">
       <div className="space-y-4 text-sm">
         <div className="grid gap-3">
           <div className="flex items-center justify-between"><span>CPU Usage</span>{bar(cpu)}<span>{cpu}%</span></div>

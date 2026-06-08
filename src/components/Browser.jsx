@@ -19,7 +19,7 @@ const results = [
   },
 ];
 
-const Browser = ({ title, onClose, onMinimize, isActive, onFocus, zIndex }) => {
+const Browser = ({ title, onClose, onMinimize, isActive, onFocus, zIndex, defaultPosition, defaultSize }) => {
   const [query, setQuery] = useState("Sadia Sakharkar portfolio");
   const [searched, setSearched] = useState(true);
 
@@ -31,8 +31,8 @@ const Browser = ({ title, onClose, onMinimize, isActive, onFocus, zIndex }) => {
       onFocus={onFocus}
       isActive={isActive}
       zIndex={zIndex}
-      defaultPosition={{ x: 110, y: 76 }}
-      defaultSize={{ width: 720, height: 460 }}
+      defaultPosition={defaultPosition}
+      defaultSize={defaultSize}
       className="bg-[#0b1014] text-white"
       contentClassName="bg-[#0b1014]"
     >

@@ -12,6 +12,8 @@ const FileExplorer = ({
   isActive,
   onFocus,
   zIndex,
+  defaultPosition,
+  defaultSize,
   filesystem,
   openFile,
   initialPath,
@@ -54,8 +56,8 @@ const FileExplorer = ({
       onFocus={onFocus}
       isActive={isActive}
       zIndex={zIndex}
-      defaultPosition={{ x: 72, y: 62 }}
-      defaultSize={{ width: 620, height: 480 }}
+      defaultPosition={defaultPosition}
+      defaultSize={defaultSize}
       className="bg-[#0a0a0a] text-[#98d1ac]"
       contentClassName="bg-[#0a0a0a]"
     >

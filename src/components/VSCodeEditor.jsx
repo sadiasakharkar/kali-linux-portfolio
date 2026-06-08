@@ -1,7 +1,7 @@
 import React from "react";
 import WindowFrame from "./WindowFrame";
 
-const VSCodeEditor = ({ title, onClose, onMinimize, isActive, onFocus, zIndex }) => {
+const VSCodeEditor = ({ title, onClose, onMinimize, isActive, onFocus, zIndex, defaultPosition, defaultSize }) => {
   return (
     <WindowFrame
       title={title}
@@ -10,8 +10,8 @@ const VSCodeEditor = ({ title, onClose, onMinimize, isActive, onFocus, zIndex })
       onFocus={onFocus}
       isActive={isActive}
       zIndex={zIndex}
-      defaultPosition={{ x: 140, y: 86 }}
-      defaultSize={{ width: 760, height: 500 }}
+      defaultPosition={defaultPosition}
+      defaultSize={defaultSize}
       className="bg-[#111827] text-gray-100"
       contentClassName="bg-[#111827]"
     >

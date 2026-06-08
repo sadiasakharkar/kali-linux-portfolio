@@ -14,14 +14,14 @@ import { createInitialFilesystem, getNodeAtPath } from "../utils/fakeFilesystem"
 let appIdCounter = 0;
 
 const APP_META = {
-  terminal: { label: "Terminal", icon: "/terminal-icon.png", title: "root@kali:~" },
-  browser: { label: "Browser", icon: "/browser-icon.png", title: "Brave Browser" },
-  folder: { label: "Files", icon: "/folder-icon.png", title: "~/Documents" },
-  vsCode: { label: "VS Code", icon: "/vscode-icon.png", title: "VS Code - kali-linux-portfolio" },
-  monitor: { label: "System Monitor", icon: "/monitor-icon.png", title: "System Monitor" },
-  firewall: { label: "Firewall", icon: "/firewall-icon.svg", title: "Kali Firewall" },
-  portscanner: { label: "Port Scanner", icon: "/scanner-icon.svg", title: "Kali Port Scanner" },
-  cracker: { label: "Password Cracker", icon: "/password-icon.svg", title: "Kali Password Cracker" },
+  terminal: { label: "Terminal", icon: "/terminal-icon.png", title: "root@kali:~", size: { width: 720, height: 460 } },
+  browser: { label: "Browser", icon: "/browser-icon.png", title: "Brave Browser", size: { width: 760, height: 500 } },
+  folder: { label: "Files", icon: "/folder-icon.png", title: "~/Documents", size: { width: 660, height: 500 } },
+  vsCode: { label: "VS Code", icon: "/vscode-icon.png", title: "VS Code - kali-linux-portfolio", size: { width: 820, height: 540 } },
+  monitor: { label: "System Monitor", icon: "/monitor-icon.png", title: "System Monitor", size: { width: 480, height: 450 } },
+  firewall: { label: "Firewall", icon: "/firewall-icon.svg", title: "Kali Firewall", size: { width: 660, height: 500 } },
+  portscanner: { label: "Port Scanner", icon: "/scanner-icon.svg", title: "Kali Port Scanner", size: { width: 640, height: 480 } },
+  cracker: { label: "Password Cracker", icon: "/password-icon.svg", title: "Kali Password Cracker", size: { width: 620, height: 450 } },
 };
 
 const Desktop = () => {
@@ -39,7 +39,31 @@ const Desktop = () => {
   const currentApps = workspaces[currentWorkspace];
   const activeApp = currentApps.find((app) => app.id === activeAppId);
   const dockApps = useMemo(() => ["terminal", "browser", "folder", "vsCode", "monitor", "firewall", "portscanner", "cracker"], []);
-  const wallpapers = ["/wallpapers/wallpaper1.png", "/wallpapers/wallpaper2.jpeg", "/wallpapers/wallpaper3.jpeg", "/kali-wallpaper.jpg"];
+  const wallpapers = [
+    "/wallpapers/wallpaper1.png",
+    "/wallpapers/wallpaper2.jpeg",
+    "/wallpapers/wallpaper3.jpeg",
+    "/wallpapers/wallpaper4.jpg",
+    "/wallpapers/wallpaper5.jpg",
+    "/wallpapers/wallpaper6.jpg",
+    "/wallpapers/wallpaper7.jpg",
+    "/wallpapers/wallpaper8.jpg",
+    "/kali-wallpaper.jpg",
+  ];
+
+  const getWindowPlacement = (appName, sequence) => {
+    const meta = APP_META[appName];
+    const isSmall = typeof window !== "undefined" && window.innerWidth <= 760;
+    if (isSmall) return { position: { x: 12, y: 12 }, size: meta.size };
+    const offset = (sequence % 8) * 34;
+    const base = appName === "terminal" ? { x: 112, y: 84 } : { x: 150, y: 96 };
+    const maxX = Math.max(80, window.innerWidth - meta.size.width - 28);
+    const maxY = Math.max(64, window.innerHeight - meta.size.height - 52);
+    return {
+      position: { x: Math.min(base.x + offset, maxX), y: Math.min(base.y + offset, maxY) },
+      size: meta.size,
+    };
+  };
 
   const focusApp = (id) => {
     setTopZIndex((value) => {
@@ -63,12 +87,15 @@ const Desktop = () => {
     }
 
     const id = ++appIdCounter;
+    const placement = getWindowPlacement(appName, currentApps.length);
     const newApp = {
       id,
       name: appName,
       minimized: false,
       zIndex: topZIndex + 1,
       initialPath: options.initialPath,
+      position: placement.position,
+      size: placement.size,
     };
 
     setTopZIndex((value) => value + 1);
@@ -141,6 +168,8 @@ const Desktop = () => {
       isActive: activeAppId === app.id,
       onFocus: () => focusApp(app.id),
       zIndex: app.zIndex,
+      defaultPosition: app.position,
+      defaultSize: app.size,
     };
 
     if (app.name === "terminal") {
@@ -215,10 +244,10 @@ const Desktop = () => {
           </button>
         </aside>
 
-        <section className="desktop-area relative min-w-0 flex-1 overflow-hidden p-4" style={{ backgroundImage: `url('${wallpaper}')`, backgroundSize: "cover", backgroundPosition: "center" }}>
-          <div className="quick-files grid w-fit grid-cols-2 gap-3 text-xs text-cyan-100 sm:grid-cols-3">
+        <section className="desktop-area relative min-w-0 flex-1 overflow-hidden p-6" style={{ backgroundImage: `url('${wallpaper}')`, backgroundSize: "cover", backgroundPosition: "center" }}>
+          <div className="quick-files grid w-fit grid-cols-1 gap-3 text-xs text-cyan-100">
             {[["About", "About_Sadia.txt"], ["Projects", "Projects"], ["Resume", "Resume.pdf"], ["Contact", "Contact.txt"]].map(([label, fileName]) => (
-              <button key={fileName} type="button" onClick={() => openDesktopItem(fileName)} className="w-24 rounded border border-cyan-700 bg-black/55 px-2 py-2 text-center backdrop-blur-sm hover:border-cyan-300" title={`Open ${label} in Files`}>
+              <button key={fileName} type="button" onClick={() => openDesktopItem(fileName)} className="desktop-icon w-24 rounded-sm border border-transparent bg-black/35 px-2 py-2 text-center backdrop-blur-sm hover:border-cyan-300 hover:bg-cyan-950/50" title={`Open ${label} in Files`}>
                 <img src="/folder-icon.png" alt="" className="mx-auto mb-1 h-7 w-7" />
                 {label}
               </button>

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import WindowFrame from "./WindowFrame";
 
-const PortScanner = ({ title, onClose, onMinimize, isActive, onFocus, zIndex }) => {
+const PortScanner = ({ title, onClose, onMinimize, isActive, onFocus, zIndex, defaultPosition, defaultSize }) => {
   const [target, setTarget] = useState("127.0.0.1");
   const [results, setResults] = useState([]);
   const [log, setLog] = useState(["nmap simulator initialized", "Only portfolio-safe mock scans are performed."]);
@@ -26,7 +26,7 @@ const PortScanner = ({ title, onClose, onMinimize, isActive, onFocus, zIndex }) 
   };
 
   return (
-    <WindowFrame title={title} onClose={onClose} onMinimize={onMinimize} onFocus={onFocus} isActive={isActive} zIndex={zIndex} defaultPosition={{ x: 230, y: 120 }} defaultSize={{ width: 620, height: 460 }} className="bg-black text-green-400" contentClassName="bg-black p-4">
+    <WindowFrame title={title} onClose={onClose} onMinimize={onMinimize} onFocus={onFocus} isActive={isActive} zIndex={zIndex} defaultPosition={defaultPosition} defaultSize={defaultSize} className="bg-black text-green-400" contentClassName="bg-black p-4">
       <div className="space-y-4 text-sm">
         <div className="flex gap-2">
           <input aria-label="Scan target" value={target} onChange={(event) => setTarget(event.target.value)} className="min-w-0 flex-1 border border-green-700 bg-[#050505] px-2 py-1 text-green-300 outline-none focus:border-cyan-400" />

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import WindowFrame from "./WindowFrame";
 
-const Firewall = ({ title, onClose, onMinimize, isActive, onFocus, zIndex }) => {
+const Firewall = ({ title, onClose, onMinimize, isActive, onFocus, zIndex, defaultPosition, defaultSize }) => {
   const [rules, setRules] = useState([
     { id: 1, protocol: "TCP", port: "22", direction: "IN", action: "ALLOW", service: "ssh" },
     { id: 2, protocol: "TCP", port: "443", direction: "OUT", action: "ALLOW", service: "portfolio-web" },
@@ -16,7 +16,7 @@ const Firewall = ({ title, onClose, onMinimize, isActive, onFocus, zIndex }) => 
   };
 
   return (
-    <WindowFrame title={title} onClose={onClose} onMinimize={onMinimize} onFocus={onFocus} isActive={isActive} zIndex={zIndex} defaultPosition={{ x: 205, y: 115 }} defaultSize={{ width: 640, height: 480 }} className="bg-black text-green-400" contentClassName="bg-black p-4">
+    <WindowFrame title={title} onClose={onClose} onMinimize={onMinimize} onFocus={onFocus} isActive={isActive} zIndex={zIndex} defaultPosition={defaultPosition} defaultSize={defaultSize} className="bg-black text-green-400" contentClassName="bg-black p-4">
       <div className="space-y-4 text-sm">
         <table className="w-full border border-green-700 text-left text-xs">
           <thead className="bg-green-950/60 text-cyan-300"><tr><th className="p-2">ID</th><th>Proto</th><th>Port</th><th>Dir</th><th>Action</th><th>Service</th></tr></thead>

@@ -1,7 +1,6 @@
 export const profile = {
   name: "Sadia Sakharkar",
   email: "sakharkarsadia@gmail.com",
-  phone: "+91 8055440700",
   location: "Pune, India",
   objective:
     "Second-year Computer Engineering student with knowledge of Java, Python, OOP, Data Structures, Networking, and Machine Learning. Eager to apply technical skills, gain industry experience, and contribute as a Software Engineering Intern.",
@@ -113,6 +112,6 @@ export const profile = {
 };
 
 export const profileText = () =>
-  `${profile.name}\n${profile.email} | ${profile.phone} | ${profile.location}\n\nCAREER OBJECTIVE\n${profile.objective}\n\nEDUCATION\n${profile.education
+  `${profile.name}\n${profile.email} | ${profile.location}\n\nCAREER OBJECTIVE\n${profile.objective}\n\nEDUCATION\n${profile.education
     .map((item) => `${item.degree}\n${item.school}\n${item.period} | ${item.score}`)
     .join("\n\n")}\n\nSKILLS\n${profile.skills.join(" | ")}`;

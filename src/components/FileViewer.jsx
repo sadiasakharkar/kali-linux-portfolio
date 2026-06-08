@@ -71,7 +71,7 @@ const FileViewer = ({ fileName, node, onClose, zIndex }) => {
           <SectionTitle>Resume</SectionTitle>
           <div className="rounded border border-cyan-900 bg-black/40 p-4">
             <h4 className="text-lg font-semibold text-cyan-300">{profile.name}</h4>
-            <p>{profile.email} | {profile.phone} | {profile.location}</p>
+            <p>{profile.email} | {profile.location}</p>
             <p className="mt-3">{profile.objective}</p>
           </div>
           <div>
@@ -91,7 +91,6 @@ const FileViewer = ({ fileName, node, onClose, zIndex }) => {
         <div className="space-y-3 text-sm text-cyan-100">
           <SectionTitle>Contact</SectionTitle>
           <p>Email: <a className="text-blue-400 underline" href={`mailto:${profile.email}`}>{profile.email}</a></p>
-          <p>Phone: {profile.phone}</p>
           <p>Location: {profile.location}</p>
           <p>GitHub: <a className="text-blue-400 underline" href="https://github.com/sadiasakharkar" target="_blank" rel="noreferrer">github.com/sadiasakharkar</a></p>
         </div>
